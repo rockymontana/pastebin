@@ -11,7 +11,7 @@ class PastesController extends Controller
     {
         $paste = Paste::fromRequest($request);
 
-        return redirect()->route('show', $paste->hash);
+        return response()->json($paste, 201);
     }
 
     public function show(Paste $paste)

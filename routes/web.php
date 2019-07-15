@@ -1,6 +1,7 @@
 <?php
 
-Route::view('/', 'create')->name('home');
+// Route::view('/', 'create')->name('home');
+Route::view('/', 'new')->name('home');
 Route::post('/', 'PastesController@post');
 Route::get('{paste}', ['as' => 'show', 'uses' => 'PastesController@show']);
 Route::get('{paste}/raw', ['as' => 'raw', 'uses' => 'PastesController@raw']);

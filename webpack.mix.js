@@ -1,5 +1,5 @@
 let mix = require('laravel-mix');
-
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 /*
  |--------------------------------------------------------------------------
  | Mix Asset Management
@@ -12,4 +12,13 @@ let mix = require('laravel-mix');
  */
 
 mix.js('resources/js/app.js', 'public/js')
-    .sass('resources/sass/app.scss', 'public/css');
+    .postCss('resources/css/main.css', 'public/css', [
+        require('tailwindcss'),
+    ]).webpackConfig(webpack => {
+        return {
+            plugins: [
+                new MonacoWebpackPlugin()
+            ]
+        };
+    }
+);
