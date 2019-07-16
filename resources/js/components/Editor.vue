@@ -3,7 +3,7 @@
     <div class="w-full flex items-center justify-between h-12 bg-solarized">
         <div class="pl-4 bg-solarized">
           <div class="inline-block relative w-64">
-            <select v-model="language" class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+            <select v-model="language" class="block appearance-none w-full bg-gray-200 text-gray-700 border border-gray-400 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
               <option
                 v-for="(lang, index) in languages"
                 :key="index"
@@ -18,14 +18,15 @@
           </div>
         </div>
         <div class="pr-4 bg-solarized">
-        <button class="py-1 px-4 rounded-full ml-2 bg-gray-700 text-gray-200 items-center justify-end">Fork</button>
-        <button class="py-1 px-4 rounded-full bg-gray-200 text-gray-700 items-center justify-end" @click="savePaste">Save</button>
+        <a href="/" class="py-1 px-4 rounded-full bg-solarized-blue-base text-gray-900 items-center justify-end font-bold">New</a>
+        <a v-if="paste" :href="`/fork/${paste.hash}`" class="py-1 px-4 ml-2 rounded-full bg-solarized-gray-base text-gray-200 items-center justify-end font-bold">Fork</a>
+        <button class="py-1 px-4 ml-2 rounded-full bg-gray-200 text-gray-700 items-center justify-end font-bold" @click="savePaste">Save</button>
       </div>
     </div>
     <MonacoEditor ref="editor" class="mt-2 w-full flex-grow" v-model="code" :language="language" :options="options"></MonacoEditor>
-    <div class="px-2 w-full flex items-center justify-between h-6 bg-solarized-highlight" v-if="createdAt">
+    <div class="px-2 w-full flex items-center justify-between h-6 bg-solarized-highlight font-mono font-semibold text-sm" v-if="createdAt">
         <span v-if="options.readOnly === true" class="text-red-600 font-semibold">Read Only</span>
-        <span class="text-gray-200">Created At: {{createdAt}}</span>
+        <span class="text-gray-500">Created At: {{createdAt}}</span>
     </div>
   </div>
 </template>
@@ -46,15 +47,7 @@ export default {
         { label: 'JavaScript', name: 'javascript'},
       ],
       language: 'php',
-      code: `<?php
-
-class Foobar {
-  private $variable = 'something';
-  public function getVariable() {
-    return $this->variable
-  }
-}
-`,
+      code: "",
       options: {
         theme: 'vs-dark',
         fontSize: 16,
@@ -81,17 +74,25 @@ class Foobar {
       this.language = language.name
     },
     savePaste() {
-      if (this.paste) {
+      if (this.readOnly) {
         alert('Read Only')
         return;
       }
 
-      axios.post('/', {code: this.code}).then(({data}) => {
-          window.location.href = `/${data.hash}`
-      }).catch(err => {
-        alert('Oups, didnt work!')
-      })
-    }
+      if ( !this.paste ) {
+        axios.post('/', {code: this.code}).then(({data}) => {
+            window.location.href = `/${data.hash}`
+        }).catch(err => {
+          alert('Oups, didnt work!')
+        })
+      } else if (this.paste.hash && !this.readOnly) {
+        axios.patch(`/${this.paste.hash}`, {code: this.code}).then(({data}) => {
+            window.location.href = `/${data.hash}`
+        }).catch(err => {
+          alert('Oups, didnt work!')
+        })
+      }
+    },
   },
   mounted() {
     // let monaco = this.$refs.editor.getMonaco()
